@@ -2,10 +2,10 @@
     <div class="wrapper" id="wrapper" ref="area">
         <el-config-provider>
             <el-row :gutter="20" class="wrapbody">
-                <el-col :xs="8" :sm="8" :md="5" :lg="5" class="side">
+                <el-col :xs="24" :sm="5" :md="5" :lg="5" class="side">
                     <v-sidebar></v-sidebar>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="19" :lg="19" class="content-box" id="content-box">
+                <el-col :xs="24" :sm="19" :md="19" :lg="19" class="content-box" id="content-box">
                     <div class="content">
                         <router-view v-slot="{ Component }">
                             <keep-alive>
@@ -70,9 +70,9 @@ export default {
   :deep(.wrapbody) {
     width: 100%;
     padding: 30px 0;
-  }
-  .content-box {
-    height: 100%;
+    @media screen and (max-width: 768px) {
+      margin: 0 !important;
+    }
   }
   .content {
     position: relative;

@@ -6,20 +6,20 @@
         <el-radio label="Non-Custodial">Non-Custodial</el-radio>
       </el-radio-group>
       <el-form ref="ruleFormRef" :rules="rules" :model="form" label-width="160px" v-loading="loadTotaling">
-        <el-form-item label="OperatorAddress" prop="operatorAddress" v-if="activeName === 'Custodial'">
-          <el-input v-model="form.operatorAddress" />
+        <el-form-item label="OperatorAddress" prop="address" v-show="activeName === 'Custodial'">
+          <el-input v-model="form.address" />
         </el-form-item>
-        <el-form-item label="OperatorPublicKey" prop="operatorPublicKey" v-if="activeName === 'Non-Custodial'">
-          <el-input v-model="form.operatorPublicKey" />
+        <el-form-item label="OperatorPublicKey" prop="public_key" v-show="activeName === 'Non-Custodial'">
+          <el-input v-model="form.public_key" />
         </el-form-item>
-        <el-form-item label="OutputAddress" prop="outputAddress" v-if="activeName === 'Non-Custodial'">
-          <el-input v-model="form.outputAddress" />
+        <el-form-item label="OutputAddress" prop="output_addr" v-show="activeName === 'Non-Custodial'">
+          <el-input v-model="form.output_addr" />
         </el-form-item>
         <el-form-item label="Amount" prop="amount">
           <el-input v-model="form.amount" />
         </el-form-item>
-        <el-form-item label="RelayChainIDs" prop="relayChainIDs">
-          <el-select v-model="form.relayChainIDs" placeholder="">
+        <el-form-item label="RelayChainIDs" prop="relay_chain_ids">
+          <el-select v-model="form.relay_chain_ids" placeholder="">
             <el-option label="Pocket Network mainnet (0001)" value="0001" />
             <el-option label="Pocket Network Testnet (0002)" value="0002" />
             <el-option label="Avalanche mainnet (0003)" value="0003" />
@@ -30,11 +30,11 @@
             <el-option label="NEAR mainnet (0052)" value="0052" />
           </el-select>
         </el-form-item>
-        <el-form-item label="ServiceURI" prop="serviceURI">
-          <el-input v-model="form.serviceURI" />
+        <el-form-item label="ServiceURI" prop="service_url">
+          <el-input v-model="form.service_url" />
         </el-form-item>
-        <el-form-item label="NetworkID" prop="networkID">
-          <el-radio-group v-model="form.networkID">
+        <el-form-item label="NetworkID" prop="network_id">
+          <el-radio-group v-model="form.network_id">
             <el-radio label="mainnet" />
             <el-radio label="testnet" />
           </el-radio-group>
@@ -42,8 +42,8 @@
         <el-form-item label="Fee" prop="fee">
           <el-input v-model="form.fee" />
         </el-form-item>
-        <el-form-item label="IsBefore" prop="isBefore">
-          <el-radio-group v-model="form.isBefore">
+        <el-form-item label="IsBefore" prop="is_before">
+          <el-radio-group v-model="form.is_before">
             <el-radio label="true" />
             <el-radio label="false" />
           </el-radio-group>
@@ -72,15 +72,15 @@ export default defineComponent({
     return {
       loadTotaling: false,
       form: {
-        operatorPublicKey: '',
-        outputAddress: '',
-        operatorAddress: '',
+        public_key: '',
+        output_addr: '',
+        address: '',
         amount: '',
-        relayChainIDs: '0001',
-        serviceURI: '',
-        networkID: 'mainnet',
+        relay_chain_ids: '0001',
+        service_url: '',
+        network_id: 'mainnet',
         fee: '',
-        isBefore: 'false',
+        is_before: 'false',
         passwd: ''
       },
       rules: [],
@@ -112,7 +112,7 @@ export default defineComponent({
           'Content-Type': 'application/json'
         }
       }
-      let baseUrl = `${process.env.VUE_APP_API_HOST}${type === 'non' ? '/api/pocket/v1/noncustodial' : '/api/pocket/v1/custodial'}`
+      let baseUrl = `${process.env.VUE_APP_API_HOST}${type === 'non' ? '/api/api/pocket/v1/noncustodial' : '/api/api/pocket/v1/custodial'}`
       const dataResponse = await that.system.$commonFun.sendRequest(baseUrl, 'post', that.form, config)
       if (!dataResponse || dataResponse.status !== 'success') {
         that.tipMessage(dataResponse ? dataResponse.data.Result : 'Failed', 0)
@@ -196,10 +196,19 @@ export default defineComponent({
     :deep(.title_label) {
       width: 100%;
       padding: 0 0 0 160px;
+      @media screen and (max-width: 768px) {
+        padding: 0;
+        justify-content: center;
+      }
     }
     :deep(.el-form) {
       padding: 0.5rem 0 0.3rem;
       .el-form-item {
+        .el-form-item__label {
+          @media screen and (max-width: 768px) {
+            width: 125px !important;
+          }
+        }
         .el-checkbox-group {
           text-align: left;
         }

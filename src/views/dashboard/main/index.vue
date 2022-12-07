@@ -1,133 +1,157 @@
 <template>
-    <section id="step">
-        <div class="tableParent">
-            <!-- <div class="search_style">
-                <h4></h4>
-                <el-input v-model="searchValue" class="w-50 m-2" placeholder="" />
-            </div> -->
-            <el-table :data="tableData" v-loading="loadTotaling" :empty-text="$t('no_data')">
-                <el-table-column prop="version" :label="$t('version')"></el-table-column>
-                <el-table-column prop="height" :label="$t('height')"></el-table-column>
-                <el-table-column prop="address" :label="$t('address')"></el-table-column>
-                <el-table-column prop="balance" :label="$t('balance')"></el-table-column>
-                <el-table-column prop="award" :label="$t('award')"></el-table-column>
-                <el-table-column prop="jailed" :label="$t('jailed')"></el-table-column>
-                <el-table-column prop="jailedBlock" :label="$t('jailedBlock')"></el-table-column>
-                <el-table-column prop="jailedUntil" :label="$t('jailedUntil')" width="120">
-                    <template #default="scope">
-                        {{momentFun(scope.row.jailedUntil)}}
-                    </template>
-                </el-table-column>
-            </el-table>
-            <div class="action">
-                <el-button @click="init()">start</el-button>
-                <el-button @click="stopFun()">stop</el-button>
-            </div>
+  <section id="step">
+    <div class="tableParent">
+      <div class="search_style">
+        <h4></h4>
+        <!-- <el-input v-model="searchValue" class="w-50 m-2 input" placeholder="" /> -->
+        <div class="refresh_time">
+          <el-select v-model="refreshValue" placeholder="" @change="refreChange">
+            <el-option label="30s" value="30" />
+            <el-option label="1min" value="60" />
+            <el-option label="5min" value="300" />
+          </el-select>
+          <el-button type="primary" @click="refreChange(refreshValue)">
+            <el-icon>
+              <Refresh />
+            </el-icon>
+          </el-button>
         </div>
-    </section>
+      </div>
+      <el-table :data="tableData" v-loading="loadTotaling" :empty-text="$t('no_data')">
+        <el-table-column prop="version" :label="$t('version')"></el-table-column>
+        <el-table-column prop="height" :label="$t('height')"></el-table-column>
+        <el-table-column prop="address" :label="$t('address')">
+          <template #default="scope">
+            <div class="hot-cold-box" @click="goLink(scope.row.address)">
+              <a class="text_blank">{{ scope.row.address }}</a>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="balance" :label="$t('balance')"></el-table-column>
+        <el-table-column prop="award" :label="$t('award')"></el-table-column>
+        <el-table-column prop="jailed" :label="$t('jailed')"></el-table-column>
+        <el-table-column prop="jailedBlock" :label="$t('jailedBlock')"></el-table-column>
+        <el-table-column prop="jailedUntil" :label="$t('jailedUntil')" width="120">
+          <template #default="scope">
+            {{momentFun(scope.row.jailedUntil)}}
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- <div class="action">
+        <el-button @click="init()" :disabled="!stopStatus">start</el-button>
+        <el-button @click="stopFun()" :disabled="stopStatus">stop</el-button>
+      </div> -->
+    </div>
+  </section>
 </template>
 
 <script>
 let that
 import { defineComponent, h, getCurrentInstance } from 'vue'
-import { Search, DocumentCopy, Warning } from '@element-plus/icons-vue'
+import { Search, Refresh, Warning } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import moment from 'moment'
 export default defineComponent({
-    name: 'Node Status',
-    data () {
-        return {
-            i: 0,
-            loadTotaling: true,
-            taskData: [],
-            searchName: '',
-            tableData: [],
-            parma: {
-                total: 0,
-                currentPage: 1,
-                pageSize: 10,
-            },
-            searchValue: '',
-            system: getCurrentInstance().appContext.config.globalProperties,
-            timer: null
-        };
+  name: 'Node Status',
+  data () {
+    return {
+      i: 0,
+      loadTotaling: true,
+      searchName: '',
+      tableData: [],
+      searchValue: '',
+      system: getCurrentInstance().appContext.config.globalProperties,
+      timer: null,
+      stopStatus: false,
+      refreshValue: '30'
+    };
+  },
+  computed: {},
+  components: {
+    Search, Refresh, Warning
+  },
+  methods: {
+    sort (data) {
+      return data.sort(function (a, b) { return a.ranking - b.ranking })
     },
-    computed: {},
-    components: {
-        Search, DocumentCopy, Warning
+    timeout (delay) {
+      return new Promise((res) => setTimeout(res, delay))
     },
-    methods: {
-        sort (data) {
-            return data.sort(function (a, b) { return a.ranking - b.ranking })
-        },
-        timeout (delay) {
-            return new Promise((res) => setTimeout(res, delay))
-        },
-        tipMessage (text, typeIndex) {
-            ElMessage({
-                message: text,
-                showClose: true,
-                dangerouslyUseHTMLString: true,
-                customClass: 'hash_tips',
-                type: typeIndex ? 'success' : 'error'
-            });
-        },
-        async getData () {
-            that.loadTotaling = true
-            that.tableData = []
-            const dataResponse = await that.system.$commonFun.sendRequest(`${process.env.VUE_APP_API_HOST}/api/pocket/v1/status`, 'get')
-            if (!dataResponse || dataResponse.status !== 'success') {
-                that.tableData = []
-                that.loadTotaling = false
-                return false
-            }
-            that.tableData.push(dataResponse.data)
-            that.loadTotaling = false
-        },
-        momentFun (dateItem) {
-            let dateNew = new Date(dateItem).getTime()
-            let dataUnit = ''
-            let dataTime = new Date(dateNew) + ''
-            let dataUnitIndex = dataTime.indexOf('GMT')
-            let dataUnitArray = dataTime.substring(dataUnitIndex, dataUnitIndex + 8)
-            switch (dataUnitArray) {
-                case 'GMT+1000':
-                    dataUnit = 'GMT+10'
-                    break
-                case 'GMT-1000':
-                    dataUnit = 'GMT-10'
-                    break
-                case 'GMT+0000':
-                    dataUnit = 'GMT+0'
-                    break
-                default:
-                    dataUnit = dataUnitArray ? dataUnitArray.replace(/0/g, '') : '-'
-                    break
-            }
-            dateNew = dateNew
-                ? moment(new Date(parseInt(dateNew))).format('YYYY-MM-DD HH:mm:ss') + ` (${dataUnit})`
-                : '-'
-            return dateNew
-        },
-        async init () {
-            that.getData()
-            await that.stopFun()
-            that.timer = setInterval(() => { that.getData() }, 30000)
-        },
-        stopFun () {
-            clearTimeout(that.timer)
-        }
+    tipMessage (text, typeIndex) {
+      ElMessage({
+        message: text,
+        showClose: true,
+        dangerouslyUseHTMLString: true,
+        customClass: 'hash_tips',
+        type: typeIndex ? 'success' : 'error'
+      });
     },
-    watch: {
-        $route: function (to, from) {
-            if (to.path !== '/node_status') that.stopFun()
-        }
+    async getData () {
+      that.stopStatus = false
+      that.loadTotaling = true
+      that.tableData = []
+      const dataResponse = await that.system.$commonFun.sendRequest(`/api/api/pocket/v1/status`, 'get')
+      if (!dataResponse || dataResponse.status !== 'success') {
+        that.tableData = []
+        that.loadTotaling = false
+        return false
+      }
+      that.tableData.push(dataResponse.data)
+      that.loadTotaling = false
     },
-    mounted () { },
-    activated () {
-        that = this
-        that.init()
+    momentFun (dateItem) {
+      let dateNew = new Date(dateItem).getTime()
+      let dataUnit = ''
+      let dataTime = new Date(dateNew) + ''
+      let dataUnitIndex = dataTime.indexOf('GMT')
+      let dataUnitArray = dataTime.substring(dataUnitIndex, dataUnitIndex + 8)
+      switch (dataUnitArray) {
+        case 'GMT+1000':
+          dataUnit = 'GMT+10'
+          break
+        case 'GMT-1000':
+          dataUnit = 'GMT-10'
+          break
+        case 'GMT+0000':
+          dataUnit = 'GMT+0'
+          break
+        default:
+          dataUnit = dataUnitArray ? dataUnitArray.replace(/0/g, '') : '-'
+          break
+      }
+      dateNew = dateNew
+        ? moment(new Date(parseInt(dateNew))).format('YYYY-MM-DD HH:mm:ss') + ` (${dataUnit})`
+        : '-'
+      return dateNew
+    },
+    async init () {
+      await that.stopFun()
+      that.getData()
+      const time = Number(that.refreshValue * 1000)
+      that.timer = setInterval(() => { that.getData() }, time)
+    },
+    stopFun () {
+      that.stopStatus = true
+      clearTimeout(that.timer)
+    },
+    refreChange (val) {
+      that.refreshValue = val
+      that.init()
+    },
+    goLink (link) {
+      window.open(`https://poktscan.com/account/${link}`)
     }
+  },
+  watch: {
+    $route: function (to, from) {
+      if (to.path !== '/node_status') that.stopFun()
+    }
+  },
+  mounted () { },
+  activated () {
+    that = this
+    that.init()
+  }
 })
 </script>
 
@@ -273,7 +297,7 @@ export default defineComponent({
         font-size: 18px;
         white-space: nowrap;
       }
-      :deep(.el-input) {
+      :deep(.input) {
         width: auto;
         .el-input__inner {
           padding-left: 0.35rem;
@@ -294,6 +318,23 @@ export default defineComponent({
               height: 0.22rem;
               color: #9ea5b3;
             }
+          }
+        }
+      }
+      :deep(.refresh_time) {
+        position: relative;
+        .el-select {
+          width: 100px;
+          margin: 0 0.15rem 0 0;
+        }
+        .el-button {
+          font-family: inherit;
+          font-size: 20px;
+          @media screen and (max-width: 1600px) {
+            font-size: 18px;
+          }
+          @media screen and (max-width: 768px) {
+            font-size: 16px;
           }
         }
       }

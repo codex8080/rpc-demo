@@ -4,11 +4,11 @@
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="header_body">
         <el-menu :default-active="activeIndex" router class="el-menu-vertical-demo" @select="handleSelect">
           <el-menu-item index="/node_status">
-            <i class="icon icon_nodeStatus"></i>
+            <i class="icon icon_status"></i>
             Status
           </el-menu-item>
           <el-menu-item index="/custodial_staking">
-            <i class="icon icon_models"></i>
+            <i class="icon icon_staking"></i>
             Staking
           </el-menu-item>
         </el-menu>
@@ -82,6 +82,7 @@ export default defineComponent({
           border: 0 !important;
           border-radius: 0.1rem;
           box-shadow: 0 0 13px rgba(128, 128, 128, 0.2);
+          transition: all 0s;
           @media screen and (min-width: 1800px) {
             font-size: 15px;
           }
@@ -90,12 +91,30 @@ export default defineComponent({
             height: 20px;
             margin: 0 6px 0 0;
           }
+          .icon_status {
+            background: url(../assets/images/icons/status.png) no-repeat center;
+            background-size: 100%;
+          }
+          .icon_staking {
+            background: url(../assets/images/icons/staking.png) no-repeat center;
+            background-size: 100%;
+          }
           svg {
             width: 21px;
           }
           &.is-active,
           &:hover {
             color: #94c0ff !important;
+            .icon_status {
+              background: url(../assets/images/icons/status_1.png) no-repeat
+                center;
+              background-size: 100%;
+            }
+            .icon_staking {
+              background: url(../assets/images/icons/staking_1.png) no-repeat
+                center;
+              background-size: 100%;
+            }
           }
         }
         .el-sub-menu__title {
