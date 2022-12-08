@@ -127,9 +127,6 @@ module.exports = {
         ws: true,
         changeOrigin: true,
         secure: false,
-        pathRewrite: {
-          "^/api": ""
-        }
       },
     }
   },

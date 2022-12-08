@@ -112,7 +112,7 @@ export default defineComponent({
           'Content-Type': 'application/json'
         }
       }
-      let baseUrl = `${process.env.VUE_APP_API_HOST}${type === 'non' ? '/api/api/pocket/v1/noncustodial' : '/api/api/pocket/v1/custodial'}`
+      let baseUrl = `{type === 'non' ? '/api/pocket/v1/noncustodial' : '/api/pocket/v1/custodial'}`
       const dataResponse = await that.system.$commonFun.sendRequest(baseUrl, 'post', that.form, config)
       if (!dataResponse || dataResponse.status !== 'success') {
         that.tipMessage(dataResponse ? dataResponse.data.Result : 'Failed', 0)

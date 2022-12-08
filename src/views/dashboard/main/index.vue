@@ -90,7 +90,7 @@ export default defineComponent({
       that.stopStatus = false
       that.loadTotaling = true
       that.tableData = []
-      const dataResponse = await that.system.$commonFun.sendRequest(`/api/api/pocket/v1/status`, 'get')
+      const dataResponse = await that.system.$commonFun.sendRequest(`/api/pocket/v1/status`, 'get')
       if (!dataResponse || dataResponse.status !== 'success') {
         that.tableData = []
         that.loadTotaling = false
